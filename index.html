@@ -277,6 +277,7 @@
       let running = false;
       let previousFrame = 0;
       let lastSecond = 0;
+      let frameId = 0;
 
       function makeStar() {
         return {
@@ -358,10 +359,11 @@
 
         previousFrame = timestamp;
         draw();
-        if (running) requestAnimationFrame(update);
+        if (running) frameId = requestAnimationFrame(update);
       }
 
       function startGame() {
+        cancelAnimationFrame(frameId);
         score = 0;
         secondsLeft = 30;
         player.x = width / 2;
@@ -375,7 +377,7 @@
         running = true;
         previousFrame = 0;
         lastSecond = 0;
-        requestAnimationFrame(update);
+        frameId = requestAnimationFrame(update);
       }
 
       const keyDirections = {
