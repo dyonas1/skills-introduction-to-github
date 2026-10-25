@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fff8ed">
+    <title>Star Catcher</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Trebuchet MS", system-ui, sans-serif;
+        color: #282348;
+        background: #fff8ed;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(ellipse at 15% 15%, #ffe7cd 0, transparent 28rem),
+          radial-gradient(ellipse at 90% 85%, #e7e2ff 0, transparent 30rem),
+          #fff8ed;
+      }
+
+      main {
+        width: min(100%, 780px);
+        padding: clamp(20px, 5vw, 40px);
+        border: 2px solid #282348;
+        border-radius: 28px;
+        background: #fffdf8;
+        box-shadow: 8px 8px 0 #282348;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 7vw, 3.5rem);
+        letter-spacing: -0.06em;
+      }
+
+      .subtitle {
+        margin: 6px 0 0;
+        color: #625d7d;
+      }
+
+      .badge {
+        flex: 0 0 auto;
+        padding: 9px 13px;
+        border: 2px solid #282348;
+        border-radius: 999px;
+        background: #ffe27a;
+        font-size: 0.8rem;
+        font-weight: 800;
+        transform: rotate(5deg);
+      }
+
+      .scoreboard {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .stat {
+        min-width: 110px;
+        padding: 10px 14px;
+        border: 2px solid #282348;
+        border-radius: 14px;
+        background: #f0edff;
+        font-weight: 800;
+      }
+
+      .stat span {
+        color: #6751c8;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .game-wrap {
+        overflow: hidden;
+        border: 2px solid #282348;
+        border-radius: 18px;
+        background: #dff6ff;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 720 / 400;
+        touch-action: none;
+      }
+
+      .gamebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      #message {
+        min-height: 1.5em;
+        margin: 0;
+        color: #625d7d;
+        font-weight: 700;
+      }
+
+      button {
+        border: 2px solid #282348;
+        border-radius: 12px;
+        color: #282348;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      button:focus-visible {
+        outline: 4px solid #ff9b55;
+        outline-offset: 3px;
+      }
+
+      #start {
+        flex: 0 0 auto;
+        padding: 12px 20px;
+        background: #ff9b55;
+        box-shadow: 3px 3px 0 #282348;
+      }
+
+      #start:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 #282348;
+      }
+
+      .instructions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 17px;
+        color: #625d7d;
+        font-size: 0.9rem;
+      }
+
+      .instructions p {
+        margin: 0;
+      }
+
+      .pad {
+        display: grid;
+        grid-template-columns: repeat(3, 42px);
+        grid-template-rows: repeat(2, 36px);
+        gap: 4px;
+        flex: 0 0 auto;
+      }
+
+      .pad button {
+        background: #f0edff;
+        touch-action: none;
+        user-select: none;
+      }
+
+      .pad [data-direction="up"] {
+        grid-column: 2;
+      }
+
+      .pad [data-direction="left"] {
+        grid-column: 1;
+      }
+
+      .pad [data-direction="down"] {
+        grid-column: 2;
+      }
+
+      .pad [data-direction="right"] {
+        grid-column: 3;
+      }
+
+      @media (max-width: 520px) {
+        body {
+          padding: 14px;
+        }
+
+        main {
+          box-shadow: 5px 5px 0 #282348;
+        }
+
+        .badge {
+          font-size: 0.68rem;
+        }
+
+        .stat {
+          min-width: 0;
+          flex: 1;
+          padding: 9px;
+          text-align: center;
+          font-size: 0.9rem;
+        }
+
+        .gamebar {
+          align-items: flex-start;
+          flex-direction: column-reverse;
+        }
+
+        #start {
+          width: 100%;
+        }
+
+        .instructions {
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Star Catcher</h1>
+          <p class="subtitle">A tiny game of paws, stars, and speedy moves.</p>
+        </div>
+        <span class="badge">30-SECOND CHALLENGE</span>
+      </header>
+
+      <section class="scoreboard" aria-label="Game score">
+        <div class="stat">⭐ Stars: <span id="score">0</span></div>
+        <div class="stat">⏱ Time: <span id="time">30</span></div>
+      </section>
+
+      <div class="game-wrap">
+        <canvas id="game" width="720" height="400" aria-label="Game area. Move the cat to catch stars."></canvas>
+      </div>
+
+      <div class="gamebar">
+        <p id="message" aria-live="polite">Press play when you're ready!</p>
+        <button id="start" type="button">Play</button>
+      </div>
+
+      <div class="instructions">
+        <p>Use <strong>arrow keys</strong> or <strong>W A S D</strong> to move.<br>On a phone or tablet, use the arrows.</p>
+        <div class="pad" aria-label="Touch controls">
+          <button type="button" data-direction="up" aria-label="Move up">▲</button>
+          <button type="button" data-direction="left" aria-label="Move left">◀</button>
+          <button type="button" data-direction="down" aria-label="Move down">▼</button>
+          <button type="button" data-direction="right" aria-label="Move right">▶</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const canvas = document.querySelector("#game");
+      const context = canvas.getContext("2d");
+      const scoreElement = document.querySelector("#score");
+      const timeElement = document.querySelector("#time");
+      const messageElement = document.querySelector("#message");
+      const startButton = document.querySelector("#start");
+      const width = canvas.width;
+      const height = canvas.height;
+      const player = { x: width / 2, y: height / 2, size: 32, speed: 3.7 };
+      const directions = new Set();
+      let stars = [];
+      let score = 0;
+      let secondsLeft = 30;
+      let running = false;
+      let previousFrame = 0;
+      let lastSecond = 0;
+
+      function makeStar() {
+        return {
+          x: 28 + Math.random() * (width - 56),
+          y: 28 + Math.random() * (height - 56),
+          size: 15
+        };
+      }
+
+      function draw() {
+        context.clearRect(0, 0, width, height);
+        context.fillStyle = "#dff6ff";
+        context.fillRect(0, 0, width, height);
+
+        context.fillStyle = "rgba(68, 146, 174, 0.12)";
+        for (let x = 16; x < width; x += 32) {
+          for (let y = 16; y < height; y += 32) {
+            context.beginPath();
+            context.arc(x, y, 1.5, 0, Math.PI * 2);
+            context.fill();
+          }
+        }
+
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.font = '28px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+        for (const star of stars) {
+          context.fillText("⭐", star.x, star.y);
+        }
+
+        context.font = '48px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+        context.fillText("🐱", player.x, player.y);
+      }
+
+      function finishGame() {
+        running = false;
+        directions.clear();
+        startButton.textContent = "Play again";
+        messageElement.textContent = `Time's up! You caught ${score} star${score === 1 ? "" : "s"}!`;
+      }
+
+      function update(timestamp) {
+        if (!running) {
+          draw();
+          return;
+        }
+
+        if (previousFrame) {
+          const elapsed = Math.min(timestamp - previousFrame, 50);
+          const step = player.speed * elapsed / 16.67;
+          if (directions.has("left")) player.x -= step;
+          if (directions.has("right")) player.x += step;
+          if (directions.has("up")) player.y -= step;
+          if (directions.has("down")) player.y += step;
+          player.x = Math.max(player.size, Math.min(width - player.size, player.x));
+          player.y = Math.max(player.size, Math.min(height - player.size, player.y));
+
+          const remainingStars = [];
+          for (const star of stars) {
+            if (Math.hypot(player.x - star.x, player.y - star.y) < player.size + star.size) {
+              score += 1;
+              scoreElement.textContent = score;
+              remainingStars.push(makeStar());
+            } else {
+              remainingStars.push(star);
+            }
+          }
+          stars = remainingStars;
+
+          if (timestamp - lastSecond >= 1000) {
+            secondsLeft -= 1;
+            lastSecond = timestamp;
+            timeElement.textContent = secondsLeft;
+            if (secondsLeft <= 0) {
+              finishGame();
+            }
+          }
+        }
+
+        previousFrame = timestamp;
+        draw();
+        if (running) requestAnimationFrame(update);
+      }
+
+      function startGame() {
+        score = 0;
+        secondsLeft = 30;
+        player.x = width / 2;
+        player.y = height / 2;
+        stars = Array.from({ length: 5 }, makeStar);
+        directions.clear();
+        scoreElement.textContent = score;
+        timeElement.textContent = secondsLeft;
+        messageElement.textContent = "Catch as many stars as you can!";
+        startButton.textContent = "Restart";
+        running = true;
+        previousFrame = 0;
+        lastSecond = 0;
+        requestAnimationFrame(update);
+      }
+
+      const keyDirections = {
+        ArrowLeft: "left",
+        a: "left",
+        A: "left",
+        ArrowRight: "right",
+        d: "right",
+        D: "right",
+        ArrowUp: "up",
+        w: "up",
+        W: "up",
+        ArrowDown: "down",
+        s: "down",
+        S: "down"
+      };
+
+      window.addEventListener("keydown", (event) => {
+        const direction = keyDirections[event.key];
+        if (direction && running) {
+          event.preventDefault();
+          directions.add(direction);
+        }
+      });
+
+      window.addEventListener("keyup", (event) => {
+        const direction = keyDirections[event.key];
+        if (direction) directions.delete(direction);
+      });
+
+      window.addEventListener("blur", () => directions.clear());
+
+      document.querySelectorAll("[data-direction]").forEach((button) => {
+        const direction = button.dataset.direction;
+        button.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          if (running) directions.add(direction);
+        });
+        for (const eventName of ["pointerup", "pointercancel", "pointerleave"]) {
+          button.addEventListener(eventName, () => directions.delete(direction));
+        }
+      });
+
+      startButton.addEventListener("click", startGame);
+      draw();
+    </script>
+  </body>
+</html>
